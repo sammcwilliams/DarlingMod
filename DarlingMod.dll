@@ -1,0 +1,120 @@
+using System;
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
+using BepInEx;
+using BepInEx.Logging;
+using HarmonyLib;
+using Microsoft.CodeAnalysis;
+using UnityEngine;
+using DarlingMod.Patches;
+
+[assembly: CompilationRelaxations(8)]
+[assembly: RuntimeCompatibility(WrapNonExceptionThrows = true)]
+[assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default | DebuggableAttribute.DebuggingModes.DisableOptimizations | DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints | DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
+[assembly: TargetFramework(".NETCoreApp,Version=v6.0", FrameworkDisplayName = ".NET 6.0")]
+[assembly: AssemblyCompany("DarlingMod")]
+[assembly: AssemblyConfiguration("Debug")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyInformationalVersion("1.0.0")]
+[assembly: AssemblyProduct("DarlingMod")]
+[assembly: AssemblyTitle("DarlingMod")]
+[assembly: AssemblyVersion("1.0.0.0")]
+namespace Microsoft.CodeAnalysis
+{
+	[CompilerGenerated]
+	[Microsoft.CodeAnalysis.Embedded]
+	internal sealed class EmbeddedAttribute : Attribute
+	{
+	}
+}
+namespace System.Runtime.CompilerServices
+{
+	[CompilerGenerated]
+	[Microsoft.CodeAnalysis.Embedded]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event | AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.GenericParameter, AllowMultiple = false, Inherited = false)]
+	internal sealed class NullableAttribute : Attribute
+	{
+		public readonly byte[] NullableFlags;
+
+		public NullableAttribute(byte P_0)
+		{
+			NullableFlags = new byte[1] { P_0 };
+		}
+
+		public NullableAttribute(byte[] P_0)
+		{
+			NullableFlags = P_0;
+		}
+	}
+	[CompilerGenerated]
+	[Microsoft.CodeAnalysis.Embedded]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Interface | AttributeTargets.Delegate, AllowMultiple = false, Inherited = false)]
+	internal sealed class NullableContextAttribute : Attribute
+	{
+		public readonly byte Flag;
+
+		public NullableContextAttribute(byte P_0)
+		{
+			Flag = P_0;
+		}
+	}
+}
+namespace DarlingMod
+{
+	[BepInPlugin("samuelmackson.DarlingMod", "Darling tbh mod", "1.2.3")]
+	public class DarlingModBase : BaseUnityPlugin
+	{
+		private const string modGUID = "samuelmackson.DarlingMod";
+
+		private const string modName = "Darling tbh mod";
+
+		private const string modVersion = "1.2.3";
+
+		private readonly Harmony harmony = new Harmony("samuelmackson.DarlingMod");
+
+		private static DarlingModBase? Instance;
+
+		internal ManualLogSource? mls;
+
+		internal static AudioClip[]? newSFX;
+
+		private void Awake()
+		{
+			if ((Object)(object)Instance == (Object)null)
+			{
+				Instance = this;
+			}
+			mls = Logger.CreateLogSource("samuelmackson.DarlingMod");
+			mls.LogInfo((object)"samuelmackson.DarlingMod is loading.");
+			string location = ((BaseUnityPlugin)Instance).Info.Location;
+			string text = "DarlingMod.dll";
+			string text2 = location.TrimEnd(text.ToCharArray());
+			string text3 = text2 + "darlingsound";
+			AssetBundle val = AssetBundle.LoadFromFile(text3);
+			if ((Object)(object)val == (Object)null)
+			{
+				mls.LogError((object)"Failed to load audio assets!");
+				return;
+			}
+			newSFX = val.LoadAssetWithSubAssets<AudioClip>("assets/darling-tbh.mp3");
+			harmony.PatchAll(typeof(HoarderBugPatch));
+			mls.LogInfo((object)"samuelmackson.DarlingMod is loaded. Darling hold my hand!!!");
+		}
+	}
+}
+namespace DarlingMod.Patches
+{
+	[HarmonyPatch(typeof(HoarderBugAI))]
+	internal class HoarderBugPatch
+	{
+		[HarmonyPatch("Start")]
+		[HarmonyPostfix]
+		public static void hoarderBugAudioPatch(ref AudioClip[] ___chitterSFX)
+		{
+			AudioClip[] newSFX = DarlingModBase.newSFX;
+			___chitterSFX = newSFX;
+		}
+	}
+}

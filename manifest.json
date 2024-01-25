@@ -1,0 +1,9 @@
+{
+  "name": "DarlingMod",
+  "version_number": "0.0.1",
+  "website_url": "https://github.com/sammcwilliams/DarlingMod",
+  "description": "Lethal company mod that replaces hoarding bug sound with darling hold my hand",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100"
+  ]
+}
